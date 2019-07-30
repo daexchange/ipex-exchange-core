@@ -1,11 +1,16 @@
 package ai.turbochain.ipex.service;
 
-import com.querydsl.core.types.Predicate;
 
 import ai.turbochain.ipex.dao.ExchangeCoinRepository;
 import ai.turbochain.ipex.entity.ExchangeCoin;
 import ai.turbochain.ipex.pagination.Criteria;
-
+import com.querydsl.core.types.Predicate;
+import java.util.List;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,8 +20,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.criteria.Path;
-import java.util.List;
 
 @Service
 public class ExchangeCoinService {
@@ -34,22 +37,33 @@ public class ExchangeCoinService {
         return coinRepository.findAll(spec, sort);
     }
 
-    public List<ExchangeCoin> findAllEnabled(String coinSymbol,String basecion) {
-        Specification<ExchangeCoin> spec = (root, criteriaQuery, criteriaBuilder) -> {
-            Path<String> enable = root.get("enable");
-            Path<String> coinSymbolPath = root.get("coinSymbol");
-            Path<String> baseSymbolPath = root.get("baseSymbol");
-            
-            criteriaQuery.where(criteriaBuilder.equal(enable, 1));
-            criteriaQuery.where(criteriaBuilder.equal(baseSymbolPath, basecion));
-            criteriaQuery.where(criteriaBuilder.like(coinSymbolPath, "%" + coinSymbol + "%"));
-           
-            return null;
+
+    public List<ExchangeCoin> findAllEnabled(String coinSymbol, String basecion) {
+      Specification<ExchangeCoin> specification = (root, criteriaQuery, criteriaBuilder) -> {
+          
+          Path<String> enable = root.get("enable");
+          Path<String> coinSymbolPath = root.get("coinSymbol");
+          Path<String> baseSymbolPath = root.get("baseSymbol");
+          
+          javax.persistence.criteria.Predicate predicate1 = criteriaBuilder.equal(enable, Integer.valueOf(1));
+          javax.persistence.criteria.Predicate predicate2 = criteriaBuilder.like(coinSymbolPath, "%" + coinSymbol + "%");
+          javax.persistence.criteria.Predicate predicate3 = criteriaBuilder.equal(baseSymbolPath, basecion);
+          
+          if (StringUtils.isNotBlank(coinSymbol) && StringUtils.isNotBlank(basecion))
+            return criteriaBuilder.and(new javax.persistence.criteria.Predicate[] { predicate1, predicate2, predicate3 }); 
+          if (StringUtils.isNotBlank(coinSymbol))
+            return criteriaBuilder.and(predicate1, predicate2); 
+          if (StringUtils.isNotBlank(basecion)) {
+            return criteriaBuilder.and(predicate1, predicate3);
+          }
+          return criteriaBuilder.and(new javax.persistence.criteria.Predicate[] { predicate1 });
         };
-        Sort.Order order = new Sort.Order(Sort.Direction.ASC, "sort");
-        Sort sort = new Sort(order);
-        return coinRepository.findAll(spec, sort);
+      
+      Sort.Order order = new Sort.Order(Sort.Direction.ASC, "sort");
+      Sort sort = new Sort(new Sort.Order[] { order });
+      return this.coinRepository.findAll(specification, sort);
     }
+    
     
     public List<ExchangeCoin> findAllByFlag(int flag) {
         Specification<ExchangeCoin> spec = (root, criteriaQuery, criteriaBuilder) -> {
