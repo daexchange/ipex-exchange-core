@@ -1,13 +1,17 @@
 package ai.turbochain.ipex.entity;
 
 
-import lombok.Data;
-
+import java.io.Serializable;
 import java.math.BigDecimal;
 
+import lombok.Data;
+
 @Data
-public class KLine {
-    public KLine(){
+public class KLine implements Serializable{
+	
+	private static final long serialVersionUID = 6419130857778552302L;
+	
+	public KLine(){
 
     }
     public KLine(String period){
