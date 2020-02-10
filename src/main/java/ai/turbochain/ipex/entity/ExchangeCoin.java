@@ -1,14 +1,18 @@
 package ai.turbochain.ipex.entity;
 
 
-import lombok.Data;
+import java.math.BigDecimal;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import ai.turbochain.ipex.constant.BooleanEnum;
-
-import java.math.BigDecimal;
+import lombok.Data;
 
 @Entity
 @Data
@@ -80,4 +84,12 @@ public class ExchangeCoin {
      */
     @Column(columnDefinition = "decimal(18,8) default 0 comment '最大下单量'")
     private BigDecimal maxVolume =BigDecimal.ZERO;
+    
+    /**
+     * 来源 0代表ipex 2:hardId
+     */
+    private Integer source;
+    
+    @Transient
+    private String name;
 }
