@@ -129,4 +129,50 @@ public class ExchangeCoinService {
         return coinRepository.findAllCoinSymbol();
     }
 
+    
+    public List<ExchangeCoin> findAllEnabledBySource(Integer source) {
+        Specification<ExchangeCoin> spec = (root, criteriaQuery, criteriaBuilder) -> {
+            Path<String> enable = root.get("enable");
+            Path<String> sourcePath = root.get("source");
+    		
+            javax.persistence.criteria.Predicate predicate1 = criteriaBuilder.equal(enable, Integer.valueOf(1));
+    		javax.persistence.criteria.Predicate predicate2 = criteriaBuilder.equal(sourcePath, source);
+
+            return criteriaBuilder.and(predicate1, predicate2);
+        };
+        Sort.Order order = new Sort.Order(Sort.Direction.ASC, "sort");
+        Sort sort = new Sort(order);
+        return coinRepository.findAll(spec, sort);
+    }
+    
+    
+    public List<ExchangeCoin> findAllEnabledBySource(String coinSymbol, String basecion,Integer source) {
+    	if (StringUtils.isBlank(coinSymbol) && StringUtils.isBlank(basecion)) {
+    	  return null;
+    	}
+    	
+    	Specification<ExchangeCoin> specification = (root, criteriaQuery, criteriaBuilder) -> {
+        
+    		Path<String> enable = root.get("enable");
+    		Path<String> coinSymbolPath = root.get("coinSymbol");
+    		Path<String> baseSymbolPath = root.get("baseSymbol");
+    		Path<String> sourcePath = root.get("source");
+            
+    		javax.persistence.criteria.Predicate predicate1 = criteriaBuilder.equal(enable, Integer.valueOf(1));
+    		javax.persistence.criteria.Predicate predicate2 = criteriaBuilder.like(coinSymbolPath, "%" + coinSymbol + "%");
+    		javax.persistence.criteria.Predicate predicate3 = criteriaBuilder.equal(baseSymbolPath, basecion);
+    		javax.persistence.criteria.Predicate predicate4 = criteriaBuilder.equal(sourcePath, source);
+
+    		if (StringUtils.isNotBlank(coinSymbol) && StringUtils.isNotBlank(basecion)) {
+    			return criteriaBuilder.and(new javax.persistence.criteria.Predicate[] { predicate1, predicate2, predicate3,predicate4 }); 
+    		} else {
+    			return criteriaBuilder.and(predicate1, predicate3, predicate4);
+    		}  
+        };
+      
+      Sort.Order order = new Sort.Order(Sort.Direction.ASC, "sort");
+      Sort sort = new Sort(new Sort.Order[] { order });
+      
+      return this.coinRepository.findAll(specification, sort);
+    }
 }
