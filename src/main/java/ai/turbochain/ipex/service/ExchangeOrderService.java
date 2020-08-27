@@ -108,8 +108,7 @@ public class ExchangeOrderService extends BaseService {
                 turnover = order.getAmount().multiply(order.getPrice());
             }
             if (wallet.getBalance().compareTo(turnover) < 0) {
-                return MessageResult.error(500, "" +
-                        "" + order.getBaseSymbol());
+                return MessageResult.error(500, msService.getMessage("INSUFFICIENT_COIN") + order.getBaseSymbol());
             } else {
                 MessageResult result = memberWalletService.freezeBalance(wallet, turnover);
                 if (result.getCode() != 0) {
@@ -193,7 +192,19 @@ public class ExchangeOrderService extends BaseService {
 
         return exchangeOrderRepository.findAll(specification, pageRequest);
     }
-
+    
+    public Page<ExchangeOrder> page(String symbol, int pageNo, int pageSize) {
+        Sort orders = new Sort(new Sort.Order(Sort.Direction.DESC, "time"));
+        PageRequest pageRequest = new PageRequest(pageNo - 1, pageSize, orders);
+        Criteria<ExchangeOrder> specification = new Criteria<ExchangeOrder>();
+        if(StringUtils.isNotEmpty(symbol)){
+            specification.add(Restrictions.eq("symbol", symbol, true));
+        }
+        specification.add(Restrictions.eq("type", ExchangeOrderType.LIMIT_PRICE, true));
+        specification.add(Restrictions.eq("status", ExchangeOrderStatus.TRADING, false));
+        return exchangeOrderRepository.findAll(specification, pageRequest);
+    }
+    
 
     /**
      * 个人中心当前委托

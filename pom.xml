@@ -6,7 +6,7 @@
     <groupId>ai.turbochain.ipex</groupId>
     <artifactId>ipex-exchange-core</artifactId>
     <version>1.0.5</version>
-    
+     
     <parent>
         <groupId>ai.turbochain.ipex</groupId>
         <artifactId>ipex-parent</artifactId>

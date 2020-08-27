@@ -1,8 +1,8 @@
 package ai.turbochain.ipex.entity;
 
-import lombok.Data;
-
 import java.math.BigDecimal;
+
+import lombok.Data;
 
 @Data
 public class CoinThumb {
@@ -21,4 +21,8 @@ public class CoinThumb {
     private BigDecimal usdRate;
     //基币对usd的汇率
     private BigDecimal baseUsdRate;
+    
+    private String nameCn;
+    
+    private String rose;
 }
